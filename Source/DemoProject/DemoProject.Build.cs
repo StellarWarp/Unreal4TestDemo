@@ -6,8 +6,44 @@ public class DemoProject : ModuleRules
 {
 	public DemoProject(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay" });
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		
+		PublicIncludePaths.AddRange(new string[] {
+			"DemoProject",
+			"DemoProject/Game",
+			"DemoProject/Player",
+			"DemoProject/UI",
+		});
+
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"OnlineSubsystem",
+			"OnlineSubsystemUtils",
+			"AssetRegistry",
+			"NavigationSystem",
+			"AIModule",
+			"GameplayTasks",
+			"Gauntlet",
+		});
+		
+		DynamicallyLoadedModuleNames.AddRange(
+			new string[] {
+				"OnlineSubsystemNull",
+				"NetworkReplayStreaming",
+				"NullNetworkReplayStreaming",
+				"HttpNetworkReplayStreaming",
+				"LocalFileNetworkReplayStreaming"
+			}
+		);
+
+		PrivateIncludePathModuleNames.AddRange(
+			new string[] {
+				"NetworkReplayStreaming"
+			}
+		);
 	}
 }
