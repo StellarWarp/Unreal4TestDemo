@@ -5,7 +5,7 @@
 
 #include "CaterGameInstance.h"
 #include "CaterGameState.h"
-#include "DemoProject/Player/CaterController.h"
+#include "DemoProject/Player/CaterPlayerController.h"
 #include "DemoProject/Player/CaterPlayerState.h"
 #include "DemoProject/Player/CaterSpectatorPawn.h"
 #include "DemoProject/UI/CaterHUD.h"
@@ -14,7 +14,7 @@
 #include "UObject/ConstructorHelpers.h"
 
 
-ACaterGameMode::ACaterGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+ACaterGameMode::ACaterGameMode()
 {
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
 	if (PlayerPawnBPClass.Class != NULL)
@@ -24,7 +24,7 @@ ACaterGameMode::ACaterGameMode(const FObjectInitializer& ObjectInitializer) : Su
 	// BotPawnClass = BotPawnOb.Class;
 	
 	HUDClass = ACaterHUD::StaticClass();
-	PlayerControllerClass = ACaterController::StaticClass();
+	PlayerControllerClass = ACaterPlayerController::StaticClass();
 	PlayerStateClass = ACaterPlayerState::StaticClass();
 	SpectatorClass = ACaterSpectatorPawn::StaticClass();
 	GameStateClass = ACaterGameState::StaticClass();

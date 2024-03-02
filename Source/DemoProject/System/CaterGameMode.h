@@ -14,11 +14,12 @@ class DEMOPROJECT_API ACaterGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
-	ACaterGameMode(const FObjectInitializer& ObjectInitializer);
+	ACaterGameMode();
 
 	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
 public:
+
 
 
 };

@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameSession.h"
-#include "CaterGameSession.generated.h"
+#include "GameFramework/Actor.h"
+#include "FloatingBox.generated.h"
 
 UCLASS()
-class DEMOPROJECT_API ACaterGameSession : public AGameSession
+class DEMOPROJECT_API AFloatingBox : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ACaterGameSession();
+	AFloatingBox();
 
 protected:
 	// Called when the game starts or when spawned

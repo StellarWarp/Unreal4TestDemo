@@ -11,9 +11,11 @@ public class DemoProject : ModuleRules
 		
 		PublicIncludePaths.AddRange(new string[] {
 			"DemoProject",
-			"DemoProject/Game",
+			"DemoProject/Gameplay",
 			"DemoProject/Player",
 			"DemoProject/UI",
+			"DemoProject/System",
+			"DemoProject/Online",
 		});
 
 		PublicDependencyModuleNames.AddRange(new string[]

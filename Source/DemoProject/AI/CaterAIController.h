@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
-#include "CaterController.generated.h"
+#include "AIController.h"
+#include "CaterAIController.generated.h"
 
 UCLASS()
-class DEMOPROJECT_API ACaterController : public APlayerController
+class DEMOPROJECT_API ACaterAIController : public AAIController
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ACaterController();
+	ACaterAIController();
 
 protected:
 	// Called when the game starts or when spawned

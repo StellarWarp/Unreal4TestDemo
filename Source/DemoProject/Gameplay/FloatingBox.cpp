@@ -1,25 +1,25 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CaterGameSession.h"
+#include "FloatingBox.h"
 
 
 // Sets default values
-ACaterGameSession::ACaterGameSession()
+AFloatingBox::AFloatingBox()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
 // Called when the game starts or when spawned
-void ACaterGameSession::BeginPlay()
+void AFloatingBox::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void ACaterGameSession::Tick(float DeltaTime)
+void AFloatingBox::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }

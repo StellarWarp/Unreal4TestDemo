@@ -38,8 +38,7 @@ class DEMOPROJECT_API UCaterGameInstance : public UGameInstance
 public:
 	GENERATED_BODY()
 
-	UCaterGameInstance(const FObjectInitializer& ObjectInitializer);
-
+	UCaterGameInstance();
 public:
 	bool Tick(float DeltaSeconds); 
 	
@@ -49,6 +48,14 @@ public:
 	virtual void Shutdown() override;
 	virtual void StartGameInstance() override;
 
+	//online api
+	virtual void ReceivedNetworkEncryptionToken(const FString& EncryptionToken, const FOnEncryptionKeyResponse& Delegate) override;
+	virtual void ReceivedNetworkEncryptionAck(const FOnEncryptionKeyResponse& Delegate) override;
+
+	bool HostGame(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& InTravelURL);
+	bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults);
+	bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult);
+	void SetPendingInvite(const FCaterPendingInvite& InPendingInvite);
 
 	//state control api
 private:
@@ -67,7 +74,7 @@ private:
 	/** Current online mode of the game (offline, LAN, or online) */
 	EOnlineMode OnlineMode;
 
-private:
+public:
 	const FName GetCurrentState() const;
 
 	void BeginNewState(FName Name, FName OldState);

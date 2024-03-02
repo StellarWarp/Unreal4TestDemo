@@ -3,11 +3,13 @@
 
 #include "CaterGameInstance.h"
 
+#include "CaterGameSession.h"
 #include "CaterInGameMenuProxy.h"
 #include "CaterMainMenuProxy.h"
 #include "Containers/Ticker.h"
 #include "Misc/CoreDelegates.h"
 #include "OnlineSubsystemUtils.h"
+#include "GameFramework/GameModeBase.h"
 
 
 namespace CaterGameInstanceState
@@ -19,23 +21,28 @@ namespace CaterGameInstanceState
 	const FName Playing = FName(TEXT("Playing"));
 }
 
-UCaterGameInstance::UCaterGameInstance(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-	, OnlineMode(EOnlineMode::Online) // Default to online
+UCaterGameInstance::UCaterGameInstance(): OnlineMode(EOnlineMode::Online) // Default to online
 {
 	CurrentState = CaterGameInstanceState::None;
 }
 
 bool UCaterGameInstance::Tick(float DeltaSeconds)
 {
-
-
-	
 	return true;
 }
 
 ACaterGameSession* UCaterGameInstance::GetGameSession() const
 {
+	UWorld* const World = GetWorld();
+	if (World)
+	{
+		AGameModeBase* const Game = World->GetAuthGameMode();
+		if (Game)
+		{
+			return Cast<ACaterGameSession>(Game->GameSession);
+		}
+	}
+
 	return nullptr;
 }
 
@@ -74,7 +81,8 @@ void UCaterGameInstance::Init()
 	FCoreDelegates::ApplicationHasEnteredForegroundDelegate.AddUObject(this, &UCaterGameInstance::HandleAppResume);
 
 	FCoreDelegates::OnSafeFrameChangedEvent.AddUObject(this, &UCaterGameInstance::HandleSafeFrameChanged);
-	FCoreDelegates::OnControllerConnectionChange.AddUObject(this, &UCaterGameInstance::HandleControllerConnectionChange);
+	FCoreDelegates::OnControllerConnectionChange.
+		AddUObject(this, &UCaterGameInstance::HandleControllerConnectionChange);
 
 	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UCaterGameInstance::OnPreLoadMap);
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UCaterGameInstance::OnPostLoadMap);
@@ -106,7 +114,6 @@ void UCaterGameInstance::Init()
 	MainMenuUI->Construct(this, GetFirstGamePlayer());
 	InGameMenuUI = NewObject<UCaterInGameMenuProxy>(this);
 	InGameMenuUI->Construct(this, GetFirstGamePlayer());
-	
 }
 
 void UCaterGameInstance::Shutdown()
@@ -120,6 +127,56 @@ void UCaterGameInstance::StartGameInstance()
 	Super::StartGameInstance();
 
 	GotoState(CaterGameInstanceState::MainMenu);
+}
+
+bool UCaterGameInstance::HostGame(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& InTravelURL)
+{
+	if (GetOnlineMode() == EOnlineMode::Offline)
+	{
+		//
+		// Offline game, just go straight to map
+		//
+
+		ShowLoadingScreen();
+		GotoState(CaterGameInstanceState::Playing);
+
+		// Travel to the specified match URL
+		TravelURL = InTravelURL;
+		GetWorld()->ServerTravel(TravelURL);
+		return true;
+	}
+
+	ACaterGameSession* const GameSession = GetGameSession();
+	if (GameSession)
+	{
+		// add callback delegate for completion
+		OnCreatePresenceSessionCompleteDelegateHandle = GameSession->OnCreatePresenceSessionComplete().AddUObject(
+			this, &UCaterGameInstance::OnCreatePresenceSessionComplete);
+
+		TravelURL = InTravelURL;
+		bool const bIsLanMatch = InTravelURL.Contains(TEXT("?bIsLanMatch"));
+
+		//determine the map name from the travelURL
+		const FString& MapNameSubStr = "/Game/Maps/";
+		const FString& ChoppedMapName = TravelURL.RightChop(MapNameSubStr.Len());
+		const FString& MapName = ChoppedMapName.LeftChop(ChoppedMapName.Len() - ChoppedMapName.Find("?game"));
+
+		if (GameSession->HostSession(LocalPlayer->GetPreferredUniqueNetId().GetUniqueNetId(), NAME_GameSession,
+		                             GameType, MapName, bIsLanMatch, true, AShooterGameSession::DEFAULT_NUM_PLAYERS))
+		{
+			// If any error occurred in the above, pending state would be set
+			if ((PendingState == CurrentState) || (PendingState == ShooterGameInstanceState::None))
+			{
+				// Go ahead and go into loading state now
+				// If we fail, the delegate will handle showing the proper messaging and move to the correct state
+				ShowLoadingScreen();
+				GotoState(ShooterGameInstanceState::Playing);
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 const FName UCaterGameInstance::GetCurrentState() const
@@ -176,14 +233,14 @@ void UCaterGameInstance::EndCurrentState(FName NextState)
 
 void UCaterGameInstance::GotoState(FName NewState)
 {
-	UE_LOG( LogOnline, Log, TEXT( "GotoState: NewState: %s" ), *NewState.ToString() );
+	UE_LOG(LogOnline, Log, TEXT( "GotoState: NewState: %s" ), *NewState.ToString());
 
 	PendingState = NewState;
 }
 
 void UCaterGameInstance::MaybeChangeState()
 {
-	if ( (PendingState != CurrentState) && (PendingState != CaterGameInstanceState::None) )
+	if ((PendingState != CurrentState) && (PendingState != CaterGameInstanceState::None))
 	{
 		FName const OldState = CurrentState;
 
@@ -231,12 +288,12 @@ void UCaterGameInstance::EndPlayingState()
 }
 
 void UCaterGameInstance::HandleUserLoginChanged(int I, ELoginStatus::Type Arg, ELoginStatus::Type Arg1,
-	const FUniqueNetId& UniqueNetId)
+                                                const FUniqueNetId& UniqueNetId)
 {
 }
 
 void UCaterGameInstance::HandleControllerPairingChanged(int I, const FUniqueNetId& UniqueNetId,
-	const FUniqueNetId& UniqueNetId1)
+                                                        const FUniqueNetId& UniqueNetId1)
 {
 }
 
@@ -273,7 +330,8 @@ void UCaterGameInstance::OnPostDemoPlay()
 }
 
 void UCaterGameInstance::HandleNetworkConnectionStatusChanged(const FString& String,
-	EOnlineServerConnectionStatus::Type Arg, EOnlineServerConnectionStatus::Type Arg1)
+                                                              EOnlineServerConnectionStatus::Type Arg,
+                                                              EOnlineServerConnectionStatus::Type Arg1)
 {
 }
 
